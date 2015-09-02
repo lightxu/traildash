@@ -1,30 +1,31 @@
 #!/usr/bin/env python
 
 import json
-from os import environ
+import sys
+# from os import environ
 
 import boto3
 
+if not len(sys.argv) == 4:
+    sys.exit("Usage: python backfill.py region_name aws_sqs_url aws_s3_bucket")
 
-if not all([environ.get('AWS_S3_BUCKET'), environ.get('AWS_SQS_URL')]):
-    print('You have to specify the AWS_S3_BUCKET and AWS_SQS_URL environment variables.')
-    print('Check the "Backfilling data" section of the README file for more info.')
-    exit(1)
+region_name = sys.argv[1]
+aws_sqs_url = sys.argv[2]
+aws_s3_bucket = sys.argv[3]
 
-
-bucket = boto3.resource('s3').Bucket(environ.get('AWS_S3_BUCKET'))
-queue = boto3.resource('sqs').Queue(environ.get('AWS_SQS_URL'))
-
+bucket = boto3.resource('s3', region_name=region_name).Bucket(aws_s3_bucket)
+queue = boto3.resource('sqs', region_name=region_name).Queue(aws_sqs_url)
 
 items_queued = 0
 for item in bucket.objects.all():
     if not item.key.endswith('.json.gz'):
         continue
+    print item.key
 
     queue.send_message(
         MessageBody=json.dumps({
             'Message': json.dumps({
-                's3Bucket': environ.get('AWS_S3_BUCKET'),
+                's3Bucket': aws_s3_bucket,
                 's3ObjectKey': [item.key]
             })
         })

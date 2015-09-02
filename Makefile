@@ -3,7 +3,7 @@ KIBANA_VERSION=3.1.2
 
 deps:
 	go get github.com/aws/aws-sdk-go
-	glock sync github.com/appliedtrust/traildash
+	glock sync github.com/lightxu/traildash
 
 dist-clean:
 	rm -rf dist
@@ -26,6 +26,6 @@ kibana:
 	rm -rf kibana
 
 docker: dist
-	docker build -t appliedtrust/traildash .
+	docker build -t lightxu/traildash .
 
 
